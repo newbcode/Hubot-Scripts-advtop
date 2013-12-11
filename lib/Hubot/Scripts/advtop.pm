@@ -44,17 +44,17 @@ sub adv_cal {
     my $ua = LWP::UserAgent->new;
 
     my $fb_api_url ='http://api.facebook.com/restserver.php?method=links.getStats&urls=';
-    my $url_2011 = "http://advent.perl.kr/$year/$year-12-";
+    my $url_year = "http://advent.perl.kr/$year/$year-12-";
     my $start_num = 1;
     my ($url_gen, $adv_info, @urls);
 
     while ( $start_num <= 24 ) {
         if ( $start_num < 10 ) {
-            $url_gen = "$fb_api_url$url_2011"."0"."$start_num"."\.html";
+            $url_gen = "$fb_api_url$url_year"."0"."$start_num"."\.html";
             push @urls, $url_gen;
         }
         else {
-            $url_gen = "$fb_api_url$url_2011$start_num"."\.html";
+            $url_gen = "$fb_api_url$url_year$start_num"."\.html";
             push @urls, $url_gen;
         }
         $start_num++;

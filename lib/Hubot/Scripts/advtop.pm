@@ -17,8 +17,22 @@ sub load {
         sub {
             my $msg = shift;
             my $user = $msg->message->user->{name};
+            my @top_tens;
+            my $cnt = 1;
 
-            adv_cal();
+            my %adv_data = adv_cal();
+
+            foreach my $p ( keys %adv_data ) {
+                push @top_tens, $adv_data{$p};
+                #print "$adv_data{$p}->[4]\n"; 
+            }
+            @top_tens = sort { $b->[4] <=> $a->[4] } @top_tens;
+
+            foreach my $rank_p ( @top_tens ) {
+                print "$rank_p->[0]\n";
+                last if ($cnt == 10);
+                $cnt++;
+            }
         }
     );
 }
@@ -29,11 +43,8 @@ sub adv_cal {
 
     my $fb_api_url ='http://api.facebook.com/restserver.php?method=links.getStats&urls=';
     my $url_2011 = 'http://advent.perl.kr/2011/2011-12-';
-    my $url_gen;
     my $start_num = 1;
-    my %adv_info;
-    my @urls;
-    my @adv_info;
+    my ($url_gen, $adv_info, @urls);
 
     while ( $start_num <= 24 ) {
         if ( $start_num < 10 ) {
@@ -47,8 +58,9 @@ sub adv_cal {
         $start_num++;
     }
 
-    foreach my $url (@urls) {
+    my %adv_infos;
 
+    foreach my $url (@urls) {
         my ( $argv_url, $share, $like, $comment, $total, $rank);
         my $response = $ua->get($url);
 
@@ -62,26 +74,20 @@ sub adv_cal {
             if ( $likes =~ /<comment_count>(\d+)<\/comment_count>/ ) { $comment = $1; }
             if ( $likes =~ /<total_count>(\d+)<\/total_count>/ ) { $total = $1; }
 
-            push @adv_info, ($argv_url, $share, $like, $comment, $total);
+            # %adv_infos 익명해쉬 생성후 배열 레퍼런스를 사용하여 \@array 형태로 자료 구조를 만든다.
+            #push @{ $adv_infos{$total} ||= [] }, ($argv_url, $share, $like, $comment);
+            push @{ $adv_infos{$argv_url} ||= [] }, ($argv_url, $share, $like, $comment, $total);
         }
         else {
             die $response->status_line;
         }
-
-        %adv_info = (
-            $argv_url => {
-                share       => $share,
-                like        => $like,
-                comment     => $comment,
-                total       => $total,
-            }
-        );
     }
-    p %adv_info;
+    return %adv_infos;
+}
 
-    foreach my $paser(@adv_info) {
-        #print "$paser\n";
-    }
+sub title_parser {
+    my $html = shift;
+
 }
 
 1;

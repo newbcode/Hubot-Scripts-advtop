@@ -24,12 +24,12 @@ sub load {
 
             foreach my $p ( keys %adv_data ) {
                 push @top_tens, $adv_data{$p};
-                #print "$adv_data{$p}->[4]\n"; 
             }
             @top_tens = sort { $b->[4] <=> $a->[4] } @top_tens;
 
             foreach my $rank_p ( @top_tens ) {
-                print "$rank_p->[0]\n";
+                my $title = title_parser($rank_p->[0], $cnt);
+                $msg->send("$title($rank_p->[1]+$rank_p->[2]+$rank_p->[3]=$rank_p->[4])");  
                 last if ($cnt == 10);
                 $cnt++;
             }
@@ -86,8 +86,22 @@ sub adv_cal {
 }
 
 sub title_parser {
-    my $html = shift;
+    my ($url, $rank_num) = @_; 
 
+    my $ua = LWP::UserAgent->new;
+    my $resp = $ua->get($url);
+
+    if ($resp->is_success) {
+        my $decode_body =  $resp->decoded_content;
+        if ( $decode_body =~ /<title>(.+)<\/title>/ ) { 
+            my $title = "$rank_num. " . "$1"; 
+            $title =~ s/\|.*//g;
+            return $title;
+        }
+    }
+    else {
+        die $resp->status_line;
+    }
 }
 
 1;

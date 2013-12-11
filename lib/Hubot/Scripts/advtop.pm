@@ -12,15 +12,16 @@ sub load {
 
     $robot->hear(
     
-        qr/^advtop$/,
+        qr/^advtop (\d\d\d\d)$/,
 
         sub {
             my $msg = shift;
             my $user = $msg->message->user->{name};
+            my $year = $msg->match->[0];
             my @top_tens;
             my $cnt = 1;
 
-            my %adv_data = adv_cal();
+            my %adv_data = adv_cal($year);
 
             foreach my $p ( keys %adv_data ) {
                 push @top_tens, $adv_data{$p};
@@ -39,10 +40,11 @@ sub load {
 
 
 sub adv_cal {
+    my $year = shift;
     my $ua = LWP::UserAgent->new;
 
     my $fb_api_url ='http://api.facebook.com/restserver.php?method=links.getStats&urls=';
-    my $url_2011 = 'http://advent.perl.kr/2011/2011-12-';
+    my $url_2011 = "http://advent.perl.kr/$year/$year-12-";
     my $start_num = 1;
     my ($url_gen, $adv_info, @urls);
 
@@ -75,7 +77,6 @@ sub adv_cal {
             if ( $likes =~ /<total_count>(\d+)<\/total_count>/ ) { $total = $1; }
 
             # %adv_infos 익명해쉬 생성후 배열 레퍼런스를 사용하여 \@array 형태로 자료 구조를 만든다.
-            #push @{ $adv_infos{$total} ||= [] }, ($argv_url, $share, $like, $comment);
             push @{ $adv_infos{$argv_url} ||= [] }, ($argv_url, $share, $like, $comment, $total);
         }
         else {

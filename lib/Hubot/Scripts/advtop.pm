@@ -115,7 +115,7 @@ sub title_parser {
  
 =head1 SYNOPSIS
 
-    Perl Advent Calendar Top 10
+    advtop <year> - perl adventcalendar show popular 10 articles.
 
 =head1 AUTHOR
 
